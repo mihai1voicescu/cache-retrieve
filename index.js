@@ -77,6 +77,5 @@ class Retriever {
 }
 
 module.exports = {
-    Retriever,
-    RetrieverFromCB
+    Retriever
 };
