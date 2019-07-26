@@ -11,6 +11,8 @@ class Retriever {
      * @param {function} keyCalculator
      */
     constructor(retrieverFn, nodeCacheOptions, keyCalculator) {
+        const options = {stdTTL: 60000, useClones: false, checkperiod: 60000};
+        Object.assign(options, nodeCacheOptions);
         this._retrieverFn = retrieverFn;
         this._keyCalculator = keyCalculator;
 
@@ -18,7 +20,7 @@ class Retriever {
          * Use with caution
          * @type {NodeCache}
          */
-        this.internalCache = new NodeCache(nodeCacheOptions);
+        this.internalCache = new NodeCache(options);
         this._inProgress = new Map();
     }
 
