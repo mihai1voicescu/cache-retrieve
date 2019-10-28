@@ -1,8 +1,24 @@
-'use strict';
+import NodeCache from "node-cache";
 
-const NodeCache = require("node-cache");
+const NO_CACHE = process.env.NO_CACHE;
+if (NO_CACHE)
+    console.warn(`
+            
+            
+            
+            ===========================
+            WARNING NO CACHE MODE USED!
+            ===========================
+            
+            
+            `);
 
-class Retriever {
+
+export class Retriever<T> {
+    private readonly retrieverFn: (...args: string[]) => Promise<T>;
+    private readonly keyCalculator: (...args: string[]) => string;
+    private readonly internalCache: NodeCache;
+    private readonly inProgress: Map<string, { resolve: (value?: unknown) => void, reject: (value?: unknown) => void }[]>;
 
     /**
      * Due to the limitations of the internal cache only string and number keys are supported
@@ -10,23 +26,23 @@ class Retriever {
      * @param {Options} nodeCacheOptions
      * @param {function} keyCalculator
      */
-    constructor(retrieverFn, nodeCacheOptions, keyCalculator) {
+    constructor(retrieverFn: (...args: string[]) => Promise<T>, nodeCacheOptions: {}, keyCalculator: (obj: any) => string) {
         const options = {stdTTL: 60000, useClones: false, checkperiod: 60000};
+        if (NO_CACHE) {
+            options.stdTTL = 1;
+            options.checkperiod = 1000;
+        }
         Object.assign(options, nodeCacheOptions);
-        this._retrieverFn = retrieverFn;
-        this._keyCalculator = keyCalculator;
+        this.retrieverFn = retrieverFn;
+        this.keyCalculator = keyCalculator;
 
-        /**
-         * Use with caution
-         * @type {NodeCache}
-         */
         this.internalCache = new NodeCache(options);
-        this._inProgress = new Map();
+        this.inProgress = new Map();
     }
 
-    get(key, obj) {
+    get(key?: string, obj?: any) {
         if (!key)
-            key = this._keyCalculator(key);
+            key = this.keyCalculator(key);
         else if (!obj) {
             obj = key;
         }
@@ -36,7 +52,7 @@ class Retriever {
             let value = this.internalCache.get(key);
 
             if (value === undefined) {
-                let container = this._inProgress.get(key);
+                let container = this.inProgress.get(key);
 
                 if (container) {
                     container.push({resolve, reject});
@@ -44,10 +60,10 @@ class Retriever {
                 }
 
                 container = [];
-                this._inProgress.set(key, container);
+                this.inProgress.set(key, container);
 
-                this._retrieverFn(obj).then(value => {
-                    this._inProgress.delete(key);
+                this.retrieverFn(obj).then(value => {
+                    this.inProgress.delete(key);
 
                     if (value !== undefined)
                         this.internalCache.set(key, value);
@@ -60,11 +76,11 @@ class Retriever {
 
                     resolve(value);
                 }).catch(e => {
-                    this._inProgress.delete(key);
+                    this.inProgress.delete(key);
 
                     // check if someone else ordered
                     if (container.length) {
-                        this._inProgress.delete(key);
+                        this.inProgress.delete(key);
                         for (let p of container)
                             p.reject(e);
                     }
@@ -77,7 +93,3 @@ class Retriever {
         });
     }
 }
-
-module.exports = {
-    Retriever
-};

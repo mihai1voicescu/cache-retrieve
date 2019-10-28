@@ -1,9 +1,9 @@
 'use strict';
 
-const {Retriever} = require("../index");
+const {Retriever} = require("../src");
 const assert = require('assert');
 
-function sleep(ms, obj) {
+function sleep(ms: number, obj?: any) {
     return new Promise(resolve => {
         setTimeout(() => {
             resolve(obj);
@@ -11,7 +11,7 @@ function sleep(ms, obj) {
     })
 }
 
-async function counterFn(obj, ms, ret) {
+async function counterFn(obj: { start: number, end: number }, ms: number, ret: any) {
     obj.start++;
     await sleep(ms);
     obj.end++;
