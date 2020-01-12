@@ -2,9 +2,11 @@
   "name": "cache-retrieve",
   "version": "1.0.0",
   "description": "",
-  "main": "src",
+  "main": "dist/index.js",
+  "types" : "dist/index.d.ts",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "jest": {},
   "keywords": [],
@@ -15,6 +17,7 @@
     "node-cache": "^4.2.0"
   },
   "devDependencies": {
+    "@types/node": "^13.1.6",
     "@types/jest": "^24.0.20",
     "jest": "^24.9.0",
     "ts-jest": "^24.1.0",
