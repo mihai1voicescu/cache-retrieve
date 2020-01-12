@@ -1,16 +1,21 @@
 {
   "name": "cache-retrieve",
   "version": "1.0.0",
-  "description": "",
+  "description": "An automatic key retriever",
   "main": "dist/index.js",
   "types" : "dist/index.d.ts",
   "scripts": {
     "test": "jest",
-    "build": "tsc"
+    "build": "tsc",
+    "prepare" : "npm run build"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mihai1voicescu/cache-retrieve.git"
+  },
+  "keywords": ["cache", "retriver"],
+  "author": "mihaivo",
   "jest": {},
-  "keywords": [],
-  "author": "",
   "license": "MIT",
   "dependencies": {
     "mocha": "^6.2.0",
